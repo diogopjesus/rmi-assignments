@@ -3,7 +3,7 @@
 envname=".venv"
 challenge="1"
 host="localhost"
-robname="theAgent"
+robname="pClient"
 pos="0"
 outfile="solution"
 
@@ -41,15 +41,14 @@ case $challenge in
         ;;
     2)
         source $envname/bin/activate
-        python3 mainC2.py -h "$host" -p "$pos" -r "$robname"
-        # mv your_mapfile $outfile.map # if needed
+        python3 mainC2.py -h "$host" -p "$pos" -r "$robname" -f "$outfile"
+        mv solution.map $outfile.map 2> /dev/null || true # if needed
         deactivate
         ;;
     3)
         source $envname/bin/activate
-        python3 mainC3.py -h "$host" -p "$pos" -r "$robname"
-        # mv your_mapfile $outfile.path # if needed
+        python3 mainC3.py -h "$host" -p "$pos" -r "$robname" -f "$outfile"
+        mv solution.path $outfile.path 2> /dev/null || true # if needed
         deactivate
         ;;
 esac
-
