@@ -1,7 +1,7 @@
 # How to use
 Add this repository as a submodule of [ciberRatoTools](git@github.com:iris-ua/ciberRatoTools.git).
 ```bash
-git submodule add git@github.com:diogopjesus/rmi-assignments.git agent
+git submodule add git@github.com:diogopjesus/rmi-assignment1.git agent
 ```
 
 Run the build.sh script to set up the environment.
