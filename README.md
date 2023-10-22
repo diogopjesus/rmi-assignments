@@ -11,8 +11,5 @@ Run the build.sh script to set up the environment.
 
 Run the run.sh script with the assigned flag to run the agent for the specific challenge.
 ```bash
-./run.sh -c1    # run the agent for the first challenge
-./run.sh -c2    # run the agent for the second challenge
-./run.sh -c3    # run the agent for the third challenge
+./run.sh -c[1|2|3] [-h host | -r robname | -p pos | -f outfile ]  # run the agent for challenge
 ```
-
