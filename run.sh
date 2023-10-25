@@ -1,11 +1,16 @@
 #!/bin/bash
 
 envname=".venv"
-challenge="1"
+challenge="0"
 host="localhost"
 robname="pClient"
 pos="0"
 outfile="solution"
+
+if ! command -v python3 >/dev/null 2>&1 ; then
+    echo "Error: python3 not found on system!"
+    return 1
+fi
 
 while getopts "c:h:r:p:f:" op
 do
