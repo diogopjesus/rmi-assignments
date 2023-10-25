@@ -108,8 +108,8 @@ class MyRob(CRobLinkAngs):
                 else: # Same exact value for both, should not happen. TODO: check if this actually happens
                     self.driveMotors(0.1,0.1)
             else: # no accentuated turn detected
-                uL = self.controllerL.compute(0.04, posL)
-                uR = self.controllerR.compute(0.04, posR)
+                uL = self.controllerL.compute(0.0, posL)
+                uR = self.controllerR.compute(0.0, posR)
                 self.driveMotors(0.15+uL,0.15+uR)
         elif math.isnan(posL) and not math.isnan(posR): # turn to the right (no left line to the left of the centre of the robot)
             self.driveMotors(0.15,-0.15)
