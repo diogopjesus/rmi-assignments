@@ -15,8 +15,14 @@ if [ -d $envname ]; then
     fi
 fi
 
+
 echo "Creating and activating virtual environment"
 python3 -m venv $envname --prompt="ass1-env"
+if [ $? -ne  0 ]; then
+    echo "Error: Could not create virtual environment!"
+    exit 1
+fi
+
 source $envname/bin/activate
 
 echo "Install requirements"
