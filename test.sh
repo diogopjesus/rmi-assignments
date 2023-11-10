@@ -22,7 +22,7 @@ shift $(($OPTIND-1))
 
 if ! command -v gawk >/dev/null 2>&1 ; then
     echo "Error: gawk not found on system!"
-    return 1
+    exit 1
 fi
 
 case $challenge in
@@ -31,16 +31,16 @@ case $challenge in
     2)
         # check if outfile exists
         if [ ! -f $outfile ]; then
-            echo 'Error: $outfile not found!'
-            return 1
+            echo "Error: $outfile file not found!"
+            exit 1
         fi
         gawk -f ../simulator/mapping_score.awk ../simulator/mapping.out $outfile
         ;;
     3)
         # check if outfile exists
         if [ ! -f $outfile ]; then
-            echo 'Error: $outfile not found!'
-            return 1
+            echo "Error: $outfile file not found!"
+            exit 1
         fi
         gawk -f ../simulator/planning_score.awk ../simulator/planning.out $outfile
         ;;
