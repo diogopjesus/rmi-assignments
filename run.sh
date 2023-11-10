@@ -39,21 +39,9 @@ done
 shift $(($OPTIND-1))
 
 case $challenge in
-    1)
+    4)
         source $envname/bin/activate
-        python3 mainC1.py -h "$host" -p "$pos" -r "$robname"
-        deactivate
-        ;;
-    2)
-        source $envname/bin/activate
-        python3 mainC2.py -h "$host" -p "$pos" -r "$robname" -f "$outfile"
-        mv solution.map $outfile.map 2> /dev/null || true # if needed
-        deactivate
-        ;;
-    3)
-        source $envname/bin/activate
-        python3 mainC3.py -h "$host" -p "$pos" -r "$robname" -f "$outfile"
-        mv solution.path $outfile.path 2> /dev/null || true # if needed
+        python3 mainC4.py -h "$host" -p "$pos" -r "$robname" -f "$outfile"
         deactivate
         ;;
 esac

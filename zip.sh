@@ -6,7 +6,7 @@ nmec2=97596
 
 if command -v zip >/dev/null 2>&1 ; then
     mkdir -p $tmpdir/agent
-    cp build.sh run.sh mainC1.py mainC2.py mainC3.py croblink.py requirements.txt $tmpdir/agent
+    cp build.sh run.sh mainC4.py croblink.py requirements.txt $tmpdir/agent
     cd $tmpdir
     zip -r agent_$nmec1\_$nmec2.zip agent
     mv agent_$nmec1\_$nmec2.zip ../
