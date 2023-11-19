@@ -15,5 +15,5 @@ if command -v zip >/dev/null 2>&1 ; then
     cd ..; rm -r $tmpdir
 else
     echo "zip not found"
-    return 1
+    exit 1
 fi
