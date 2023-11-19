@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 challenge="0"
 outfile="solution"
 

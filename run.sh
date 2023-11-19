@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 envname=".venv"
 challenge="0"
 host="localhost"
@@ -9,7 +11,7 @@ outfile="solution"
 
 if ! command -v python3 >/dev/null 2>&1 ; then
     echo "Error: python3 not found on system!"
-    return 1
+    exit 1
 fi
 
 while getopts "c:h:r:p:f:" op

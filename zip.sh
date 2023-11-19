@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 tmpdir=".tmp9233897596"
 nmec1=92338
 nmec2=97596
