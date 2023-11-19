@@ -24,7 +24,7 @@ class CRobLink:
         
         self.sock.sendto(msg.encode(), (host, UDP_PORT))  # TODO consider host arg
         data, (host,self.port) = self.sock.recvfrom(1024)
-        # print("received message:", data, " port ", self.port)
+        #print "received message:", data, " port ", self.port
 
         parser = sax.make_parser()
         
@@ -209,8 +209,8 @@ class StructureHandler(sax.ContentHandler):
                 return
             self.status = -1
         elif name == "Parameters":
-            self.nBeacons = int(attrs["NBeacons"])
-            self.simTime  = int(attrs["SimTime"])
+            self.nBeacons = attrs["NBeacons"]
+            self.simTime = attrs["SimTime"]
         elif name=="Measures":
             self.measures.time = int(attrs["Time"])
         elif name=="Sensors":
