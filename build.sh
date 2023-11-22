@@ -2,27 +2,29 @@
 
 set -e
 
-envname=".venv"
-
-if ! command -v python3 >/dev/null 2>&1 ; then
-    echo "Error: python3 not found on system!"
+# check dependecies (cmake)
+if ! command -v cmake >/dev/null 2>&1 ; then
+    echo "Error: cmake not found on system!"
     exit 1
 fi
 
-if [ ! -d $envname ]; then
-    echo "Creating and activating virtual environment"
-    python3 -m venv $envname --prompt="ass2-env"
-    if [ $? -ne  0 ]; then
-        echo "Error: Could not create virtual environment!"
+# Build the agent
+if [ -d "build" ]; then
+    echo "Status: Removing old build directory..."
+    rm -r build
+    if [$? -ne 0]; then
+        echo "Error: Could not remove old build directory! Please remove manually."
         exit 1
-    fi    
+    fi
 fi
 
-source $envname/bin/activate
+mkdir -p build
+cd build
 
-echo "Install requirements"
-python3 -m pip install -r requirements.txt > /dev/null
-
-echo "Exiting virtual environment"
-deactivate
-
+echo "Status: Building agent..."
+cmake ..
+if ! command -v nproc >/dev/null 2>&1 ; then
+    make -j4
+else
+    make -j$(nproc)
+fi
