@@ -6,6 +6,10 @@ __pycache__/
 venv
 env
 
-# mapp and path files
+# map and path files
 *.map
 *.path
+
+# build files
+build/
+bin/
