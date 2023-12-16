@@ -30,13 +30,13 @@ shift $(($OPTIND-1))
 case $challenge in
     4)
         # check if mapfile exists
-        if [ ! -f "$outfile.map" ]; then
+        if [ ! -f "build/$outfile.map" ]; then
             echo "Error: $outfile.map file not found!"
             exit 1
         fi
 
         # check if pathfile exists
-        if [ ! -f "outfile.path" ]; then
+        if [ ! -f "build/$outfile.path" ]; then
             echo "Error: $outfile.path file not found!"
             exit 1
         fi
@@ -45,11 +45,11 @@ case $challenge in
         # TODO: compare results with the best case
         #       best case obtained by -> gawk -f ../simulator/planning_score.awk  ../simulator/planning.out ../simulator/planning.out
         echo "TEST 1: testing generated map..."
-        gawk -f ../simulator/planning_score.awk ../simulator/planning.out "$outfile.map"
+        gawk -f ../simulator/mapping_score.awk ../simulator/planning.out build/$outfile.map
 
         # TODO: compare results with the best case
         #       best case obtained is 1 (check if true)
         echo -e "\nTEST 2: testing generated path..."
-        gawk -f ../simulator/mapping_score.awk ../simulator/planning.out "$outfile.path"
+        gawk -f ../simulator/planning_score.awk ../simulator/planning.out build/$outfile.path
         ;;
 esac
