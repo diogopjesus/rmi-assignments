@@ -1,15 +1,15 @@
 
 set(agent_SRCS
     # Source
-    agentC4.cpp
     controller.cpp
-    localmap.cpp
-    localpose.cpp
+    map.cpp
+    pose.cpp
+    utils.cpp
     # Header
-    ${CMAKE_SOURCE_DIR}/include/agent/agentC4.h
     ${CMAKE_SOURCE_DIR}/include/agent/controller.h
-    ${CMAKE_SOURCE_DIR}/include/agent/localmap.h
-    ${CMAKE_SOURCE_DIR}/include/agent/localpose.h
+    ${CMAKE_SOURCE_DIR}/include/agent/map.h
+    ${CMAKE_SOURCE_DIR}/include/agent/pose.h
+    ${CMAKE_SOURCE_DIR}/include/agent/utils.h
 )
 
 add_library(agent SHARED ${agent_SRCS})

@@ -1,7 +1,7 @@
 find_package(Catch2 3 REQUIRED)
 
 set(tests_SRCS 
-    TestPerceivedMap.cpp
+    test-map.cpp
 )
 
 # These tests can use the Catch2-provided main
@@ -14,3 +14,5 @@ target_include_directories(tests PRIVATE
                         )
 
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain agent)
+
+set_target_properties(tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")

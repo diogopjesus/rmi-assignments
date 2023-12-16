@@ -160,6 +160,8 @@ CRobLink::CRobLink(char *rob_name, int rob_id, double irSensorAngles[], char *ho
 		return;
     }
 
+    port.SetRcvTimeout(2,0);
+
     send_register_message(rob_name,rob_id,irSensorAngles);
     if( Status != 0 ) return;
 
@@ -179,6 +181,8 @@ CRobLink::CRobLink(char *rob_name, int rob_id, double height, char *host) : meas
 		Status=-1;
 		return;
     }
+
+    port.SetRcvTimeout(2,0);
 
     send_robotbeacon_register_message(rob_name, rob_id, height);
     if( Status != 0 ) return;

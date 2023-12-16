@@ -1,24 +1,14 @@
 /* main.cpp
  */
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <math.h>
-#include <locale.h>
-#include <limits.h>
+#include "robSock/RobSock.h"
+#include "challenges/agentC4.h"
 
 #include <iostream>
 #include <string>
 
-#include "robSock/RobSock.h"
-
-#include "agent/agentC4.h"
-
 int main(int argc, char** argv)
 {
-    if (CHAR_BIT * sizeof(float) != 32)
-    std::cerr << "WARNING: float size different than 32 bits! Agent might behave differently..." << std::endl;
-
     std::string host = "localhost";
     std::string rob_name = "cppAgent";
     int rob_id = 1;
@@ -29,7 +19,12 @@ int main(int argc, char** argv)
     {
         std::string opt = argv[1];
         
-        if(opt == "--host" || opt == "-h")
+        if(opt == "--challenge" || opt == "-c")
+        {
+            try { rob_id = std::stoi(argv[2]); }
+            catch(...) { argc = 0; } // error message will be printed
+        }
+        else if(opt == "--host" || opt == "-h")
         {
             host = argv[2];
         }
@@ -48,7 +43,7 @@ int main(int argc, char** argv)
         }
         else
         {
-            break; // the while
+            break;
         } 
         argc -= 2;
         argv += 2;
@@ -57,12 +52,12 @@ int main(int argc, char** argv)
     if (argc != 1)
     {
         std::cerr << "Bad number of parameters\n" <<
-            "SYNOPSIS: MainC4 [--host hostname] [--robname robotname] [--pos posnumber] [--outfile outfilename]" << std::endl;
+            "SYNOPSIS: mainRob [--challenge chanumber] [--host hostname] [--robname robotname] [--pos posnumber] [--outfile outfilename]" << std::endl;
       return 1;
     }
 
     // create application
-    agent::AgentC4 agent(outfile);
+    AgentC4 agent{outfile};
 
     // connect Robot to simulator
     double irSensorAngles[4] = {0.0, 60.0, -60.0, 180.0};

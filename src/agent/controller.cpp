@@ -6,65 +6,65 @@
 namespace agent
 {
 
-float Controller::computeControlSignal(float r, float y)
+double Controller::computeControlSignal(double t_r, double t_y)
 {
-    float u = 0.0; // control signal
+    double u = 0.0; // control signal
 
-    float e = r - y;   // Compute error
+    double e = t_r - t_y;   // Compute error
 
-    if(type == BANG)
+    if(m_type == BANG)
     {
-        if(e > 0) u = bangvalue;
+        if(e > 0) u = m_bangvalue;
         else u = 0.0;
     }
-    else if(type == BANG2)
+    else if(m_type == BANG2)
     {
-        if(e > 0) u = bangvalue;
-        else if(e < 0) u = -bangvalue;
+        if(e > 0) u = m_bangvalue;
+        else if(e < 0) u = -m_bangvalue;
         else u = 0.0;
     }
-    else if(type == BANGH)
+    else if(m_type == BANGH)
     {
-        if(e > 0.5*deltah) u = bangvalue;
-        else if(e < -0.5*deltah) u = -bangvalue;
-        else u = u_m1;
+        if(e > 0.5*m_deltah) u = m_bangvalue;
+        else if(e < -0.5*m_deltah) u = -m_bangvalue;
+        else u = m_u_m1;
 
-        u_m1 = u;
+        m_u_m1 = u;
     }
-    else if(type == P)
+    else if(m_type == P)
     {
-        u = Kp * e;
+        u = m_Kp * e;
     }
-    else if(type == PID)
+    else if(m_type == PID)
     {
         // Auxiliary constants for PID controller
-        float K0 = Kp * (1+(h/Ti)) + (Td/h);
-        float K1 = -Kp * (1+2*(Td/h));
-        float K2 = Kp * (Td/h);
+        double K0 = m_Kp * (1+(m_h/m_Ti)) + (m_Td/m_h);
+        double K1 = -m_Kp * (1+2*(m_Td/m_h));
+        double K2 = m_Kp * (m_Td/m_h);
 
-        u = u_m1 + K0*e + K1*e_m1 + K2*e_m2;
-
-        // clamp control signal
-        if (u < -max_u) u = -max_u;
-        else if (u > max_u) u = max_u;
+        u = m_u_m1 + K0*e + K1*m_e_m1 + K2*m_e_m2;
 
         // update memory
-        e_m2 = e_m1;
-        e_m1 = e;
-        u_m1 = u;
+        m_e_m2 = m_e_m1;
+        m_e_m1 = e;
+        m_u_m1 = u;
     }
     else // NONE
     {
-        u = r;
+        u = t_r;
     }
+
+    // clamp control signal
+    if (u < -m_max_u) u = -m_max_u;
+    else if (u > m_max_u) u = m_max_u;
 
     return u;
 }
 
 void Controller::reset()
 {
-    e_m1 = e_m2 = 0.0;  // reset memory for error
-    u_m1 = 0.0; // reset memory for control signal
+    m_e_m1 = m_e_m2 = 0.0;  // reset memory for error
+    m_u_m1 = 0.0; // reset memory for control signal
 }
 
 }; // namespace agent
