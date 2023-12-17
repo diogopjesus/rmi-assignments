@@ -80,7 +80,7 @@ public:
     inline const int& getId() const { return m_id; }
     inline const std::vector<int>& getNeighbors() const { return m_neighbors; }
     inline bool isExpanded() const { return m_expanded; }
-    
+
     /**
      * Link a neighbor to the cell.
      * 
@@ -88,6 +88,14 @@ public:
      * @return True if the neighbor was added, false otherwise.
     */
     bool linkNeighbor(int t_id);
+
+    /**
+     * Unlink a neighbor from the cell.
+     * 
+     * @param t_id The identifier of the neighbor.
+     * @return True if the neighbor was removed, false otherwise.
+    */
+    bool unlinkNeighbor(int t_id);
 
     /**
      * Expand the cell.
@@ -99,7 +107,7 @@ public:
     inline void expand() { m_expanded = true; } 
 
 private:
-    const int m_id;
+    int m_id;
     std::vector<int> m_neighbors; // stored by their identifier
     bool m_expanded{false};
 };
@@ -125,25 +133,41 @@ public:
     bool addCell(int t_id);
 
     /**
-     * Define 2 cells as neighbors.
+     * Unlink a cell as neighbor of another cell.
      * 
-     * @param t_id The identifier of the first cell.
-     * @param t_neighbor The identifier of the second cell.
-     * @return A pair of booleans. The first is true if the first
-     *          cell was added to the second cell's neighbors, false otherwise.
-     *         The second is true if the second cell was added to
-     *          the first cell's neighbors, false otherwise.
+     * @param t_id1 The identifier of the cell.
+     * @param t_id2 The identifier of the neighbor.
     */
-    std::pair<bool,bool> linkNeighbors(int t_id1, int t_id2);
+    void unlinkNeighbor(int t_id1, int t_id2);
+
+    /**
+     * Get cell neighbors.
+     * 
+     * @param t_id The identifier of the cell.
+     * @return A vector with the identifiers of the neighbors.
+    */
+    inline std::vector<int> getNeighbors(const int& t_id) { return getCell(t_id).getNeighbors(); }
+
+    /**
+     * Link a cell as neighbor of another cell.
+     * 
+     * Do not link the neighbor to the cell. This must be done separately.
+     * This function should be called when the cell is being traversed.
+     * 
+     * @param t_id2 The identifier of the cell.
+     * @param t_id2 The identifier of the neighbor.
+     * @return True if the neighbor was added, false otherwise.
+    */
+    bool linkNeighbor(int t_id1, int t_id2);
 
     /**
      * Check if a cell is neighbor of another.
      * 
-     * @param t_id1 The identifier of the first cell.
-     * @param t_id2 The identifier of the second cell.
-     * @return True if the cells are neighbors, false otherwise.
+     * @param t_id1 The identifier of the cell.
+     * @param t_id2 The identifier of the neighbor.
+     * @return True if is neighbor, false otherwise.
     */
-    bool areNeighbors(const int& t_id1, const int& t_id2);
+    bool isNeighbor(const int& t_id1, const int& t_id2);
 
     /**
      * Set a cell as expanded.

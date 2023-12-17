@@ -59,7 +59,8 @@ TEST_CASE( "Common map usage", "[map]" )
                             // NOTE: Because we are only define neighbors and 
                             //       not expanding cells, each cell will be expanded
                             //       when achieving the maximum number of neighbors
-                            map.linkNeighbors(id1, id2);
+                            map.linkNeighbor(id1, id2);
+                            map.linkNeighbor(id2,id1);
                         }
                     }
                 }
@@ -104,14 +105,22 @@ TEST_CASE( "Small real world scenario", "[map]" )
     REQUIRE( map.addCell( computeCellId(0,2) ) ); // 612
     REQUIRE( map.addCell( computeCellId(2,2) ) ); // 614
     
-    std::pair<bool,bool> neighbors = map.linkNeighbors(514, 516);
-    REQUIRE( neighbors.first & neighbors.second );
-    neighbors = map.linkNeighbors(514, 612);
-    REQUIRE( neighbors.first & neighbors.second );
-    neighbors = map.linkNeighbors(516, 614);
-    REQUIRE( neighbors.first & neighbors.second );
-    neighbors = map.linkNeighbors(612, 614);
-    REQUIRE( neighbors.first & neighbors.second );
+    bool neighbors = map.linkNeighbor(514, 516);
+    REQUIRE( neighbors );
+    neighbors = map.linkNeighbor(516, 514);
+    REQUIRE( neighbors );
+    neighbors = map.linkNeighbor(514, 612);
+    REQUIRE( neighbors );
+    neighbors = map.linkNeighbor(612, 514);
+    REQUIRE( neighbors );
+    neighbors = map.linkNeighbor(516, 614);
+    REQUIRE( neighbors );
+    neighbors = map.linkNeighbor(614, 516);
+    REQUIRE( neighbors );
+    neighbors = map.linkNeighbor(612, 614);
+    REQUIRE( neighbors );
+    neighbors = map.linkNeighbor(614, 612);
+    REQUIRE( neighbors );
 
     REQUIRE_FALSE( map.isComplete() );
     

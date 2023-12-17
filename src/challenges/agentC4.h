@@ -34,12 +34,13 @@ private:
     std::pair<double,double> move(int& t_cid, int& t_nid);
     
     /**
-     * @brief Find neighbors of the current cell
+     * @brief Find the neighbors of the nearest cell and correct the robot position
+    */
+    void findAndCorrect();
+
+    /**
+     * @brief Find neighbors of the current cell and updates the perceived map.
      * 
-     * Stores the neighbors in the vector t_neighbors
-     * 
-     * @param t_id id of the current cell
-     * @param t_neighbors vector of neighbors
      * @return true if neighbors are found
     */
     bool findNeighbors();

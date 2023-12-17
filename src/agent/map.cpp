@@ -124,6 +124,26 @@ bool MapCell::linkNeighbor(int t_id)
     return true;
 }
 
+bool MapCell::unlinkNeighbor(int t_id)
+{
+    if(!validateCellId(t_id))
+        throw std::invalid_argument("MapCell::unlinkNeighbor - t_id=" + std::to_string(t_id) + " is not a valid identifier");
+
+    // check if t_id is a neighbor
+    if(std::find(m_neighbors.begin(), m_neighbors.end(), t_id) == m_neighbors.end())
+        return false;
+
+    // remove the neighbor
+    m_neighbors.erase(std::remove_if(m_neighbors.begin(), m_neighbors.end(),
+                [&t_id](const int& nei) {
+                    return t_id == nei;
+                }
+            ), m_neighbors.end()
+    );
+
+    return true;
+}
+
 
 /*** PerceivedMap implementation: public methods ***/
 
@@ -135,8 +155,12 @@ bool PerceivedMap::addCell(int t_id)
 
     // Check if cell is already in map
     for(MapCell& l_c : m_list)
+    {
         if(l_c.getId() == t_id)
+        {
             return false;
+        }
+    }
 
     // Add cell to map
     MapCell c {t_id};
@@ -145,7 +169,23 @@ bool PerceivedMap::addCell(int t_id)
     return true;
 }
 
-std::pair<bool,bool> PerceivedMap::linkNeighbors(int t_id1, int t_id2)
+void PerceivedMap::unlinkNeighbor(int t_id1, int t_id2)
+{
+    // Validate coordinates
+    if(!validateCellId(t_id1)) 
+        throw std::invalid_argument("PerceivedMap::removeCell - t_id1=" + std::to_string(t_id1) +" is not a valid identifier");
+
+    if(!validateCellId(t_id2)) 
+        throw std::invalid_argument("PerceivedMap::removeCell - t_id2=" + std::to_string(t_id2) +" is not a valid identifier");
+
+    // Check if cell is in map
+    if(!cellInLocalMap(t_id1) || !cellInLocalMap(t_id2))
+        return;
+    
+    getCell(t_id1).unlinkNeighbor(t_id2);
+}
+
+bool PerceivedMap::linkNeighbor(int t_id1, int t_id2)
 {
     // Validate identifiers
     if(!validateCellId(t_id1))
@@ -157,18 +197,11 @@ std::pair<bool,bool> PerceivedMap::linkNeighbors(int t_id1, int t_id2)
         throw std::invalid_argument("PerceivedMap::linkNeighbors - " + std::to_string(t_id1) + " is not in map");
     if(!cellInLocalMap(t_id2))
         throw std::invalid_argument("PerceivedMap::linkNeighbors - " + std::to_string(t_id2) + " is not in map");
-
-
-    // neighbor validity is checked in LocalMapCell::linkNeighbor
-    std::pair<bool,bool> ret = {
-        getCell(t_id1).linkNeighbor(t_id2),
-        getCell(t_id2).linkNeighbor(t_id1)
-    };
     
-    return ret;
+    return getCell(t_id1).linkNeighbor(t_id2);
 }
 
-bool PerceivedMap::areNeighbors(const int& t_id1, const int& t_id2)
+bool PerceivedMap::isNeighbor(const int& t_id1, const int& t_id2)
 {
     // Validate identifiers
     if(!validateCellId(t_id1))
@@ -232,8 +265,17 @@ int PerceivedMap::getNextCell(const int& id)
         {
             // double check if path is empty
             for(MapCell& c : m_list)
-                if(!c.isExpanded())
-                    throw std::logic_error("Something went wrong! Map not fully expanded but a cell is not expanded");
+            {
+                if(!c.isExpanded() && c.getNeighbors().size() > 0) {
+                    // print neighbors
+                    std::cout << "Neighbors of " << computeCellCoordinates(c.getId()).toString() << ": ";
+                    for(const int& n : c.getNeighbors())
+                        std::cout << computeCellCoordinates(n).toString() << " ";
+                    std::cout << std::endl;
+
+                    throw std::logic_error("Something went wrong! Map marked as fully expanded but cell " + computeCellCoordinates(c.getId()).toString() + " is not expanded");
+                }
+            }
 
             m_complete = m_list.size() > 1;
 

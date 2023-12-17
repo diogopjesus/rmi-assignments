@@ -33,11 +33,23 @@ void MovementModel::update(double t_lPow, double t_rPow)
     else if (m_dir < -M_PI) m_dir += 2.0*M_PI;
 }
 
-void MovementModel::correct(const double& t_x, const double& t_y, const double& t_theta)
+void MovementModel::correct(const double& t_dir)
+{
+    m_dir = t_dir;
+}
+
+void MovementModel::correct(const double& t_x, const double& t_y)
 {
     m_x = t_x;
     m_y = t_y;
-    m_dir = t_theta;
+}
+
+void MovementModel::correct(const double& t_x, const double& t_y, const double& t_dir)
+{
+
+    m_x = t_x;
+    m_y = t_y;
+    m_dir = t_dir;
 }
 
 std::pair<Position,double> MovementModel::predict(double t_lPow, double t_rPow) const

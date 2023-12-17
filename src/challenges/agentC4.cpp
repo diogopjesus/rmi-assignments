@@ -17,6 +17,14 @@ int AgentC4::run()
 
     while(!GetFinished()) {
         ReadSensors(); //update sensors
+        
+        //TODO: implement an filter to the compass
+        m_movModel.correct(agent::deg2rad(GetCompassSensor()));
+
+        // compare positions
+        // std::cout << "x: " << m_movModel.getXWithOffset() << " y: " << m_movModel.getYWithOffset() << " dir: " << m_movModel.getDegreesWithOffset() << std::endl;
+        // std::cout << "x: " << GetX() << " y: " << GetY() << " dir: " << GetCompassSensor() << std::endl;
+        // std::cout << std::endl;
 
         // check if simulation has finished
         if(GetTime() >= GetFinalTime() || state == FINISHED) {
@@ -44,7 +52,8 @@ int AgentC4::run()
             // expand first cell and get next cell
             case INIT:
             {
-                bool any_nei = findNeighbors();
+                // bool any_nei = findNeighbors();
+                findAndCorrect();
 
                 float dir = m_movModel.getDir();
                 if(dir > -(M_PI/4) && dir < 0) {
@@ -59,7 +68,8 @@ int AgentC4::run()
 
             case RUN:
             {
-                bool any_nei = findNeighbors();                
+                // bool any_nei = findNeighbors();                
+                findAndCorrect();
                 std::pair<double,double> powers = move(cid,nid);
                 lPow = powers.first;
                 rPow = powers.second;
@@ -87,7 +97,12 @@ int AgentC4::run()
 
         // std::cout << m_perceivedMap.toString() << std::endl;
 
-        driveMotorsExt(lPow,rPow);
+        if(state != STOP)
+        {
+            driveMotorsExt(lPow,rPow);
+
+            // std::cout << "x: " << 4.0+m_movModel.getX() << " y: " << 10.0+m_movModel.getY() << " dir: " << m_movModel.getDir() << std::endl;
+        }
     }
 
 
@@ -138,7 +153,22 @@ std::pair<double,double> AgentC4::move(int& t_cid, int& t_nid)
     if(dist < 0.1) { // if robot is close to the next cell, then get the next one
         m_perceivedMap.expandCell(t_cid);
         t_cid = t_nid;
-        t_nid = m_perceivedMap.getNextCell(t_cid);
+
+        m_perceivedMap.getNeighbors(t_cid);
+        // search for edge case where a neighbor was found
+        // but the neighbor cell did not detect that linkage
+        // when it was expanded.
+        for(int nei : m_perceivedMap.getNeighbors(t_cid)) {
+            if(m_perceivedMap.cellIsExpanded(nei) && !m_perceivedMap.isNeighbor(nei, t_cid)) {
+                t_nid = nei;
+                break;
+            }
+        }
+    
+        if(t_nid == t_cid) { // if no edge case was found, then get the next cell
+            t_nid = m_perceivedMap.getNextCell(t_cid);
+        }
+
         np = agent::computeCellCoordinates(t_nid);
     }
 
@@ -169,12 +199,26 @@ std::pair<double,double> AgentC4::move(int& t_cid, int& t_nid)
 
     // follow the line
     double linePos = agent::getLinePos();
+
     if(!std::isinf(linePos)){
         double u = m_controller.computeControlSignal(0.0, linePos);
         lPow = 0.1-u;
         rPow = 0.1+u;
     }
     else {
+        if(dist > 0.438 && t_nid != t_cid) {
+            std::cout << "unlink next cell " << agent::computeCellCoordinates(t_nid).toString() << " from " << agent::computeCellCoordinates(t_cid).toString() << std::endl;
+            // print current neighbors of cid
+            std::cout << "neighbors of " << agent::computeCellCoordinates(t_cid).toString() << ": ";
+            for(int nei : m_perceivedMap.getNeighbors(t_cid)) {
+                std::cout << agent::computeCellCoordinates(nei).toString() << " ";
+            }
+            std::cout << std::endl;
+            
+            m_perceivedMap.unlinkNeighbor(t_cid, t_nid);
+            t_nid = t_cid;
+            np = agent::computeCellCoordinates(t_cid);
+        }
         lPow = 0.1;
         rPow = 0.1;
     }
@@ -182,10 +226,64 @@ std::pair<double,double> AgentC4::move(int& t_cid, int& t_nid)
     return std::make_pair(lPow, rPow);
 }
 
-void AgentC4::driveMotorsExt(double t_lPow, double t_rPow)
+void AgentC4::findAndCorrect()
 {
-    DriveMotors(t_lPow, t_rPow);
-    m_movModel.update(t_lPow, t_rPow);
+    static double max_error = 1.5/100.0;
+
+    double og_x = m_movModel.getX();
+    double og_y = m_movModel.getY();
+
+    double error = 0.0;
+
+    std::vector<agent::Position> possible_pos;
+
+    bool success = false;
+    bool nei_checked = false;
+    while(!success)
+    {
+        try
+        {
+            findNeighbors();
+            success = true;
+            max_error += 1.5/100.0;
+        }
+        catch(const std::runtime_error& e)
+        {
+            // std::cout << std::endl;
+            // std::cout << "In correction" << std::endl;
+            // std::cout << "x: " << 4.0+m_movModel.getX() << " y: " << 10.0+m_movModel.getY() << " dir: " << m_movModel.getDir() << std::endl;
+
+            // update to new position
+            if(!possible_pos.empty())
+            {
+                agent::Position p = possible_pos.front();
+                m_movModel.correct(p.x, p.y);
+                possible_pos.erase(possible_pos.begin());
+                continue;
+            }
+            
+            // compute possible positions
+            for(double offset = 0; offset < max_error; offset += 0.001)
+            {
+                for(double angle = 0; angle < 2*M_PI; angle += (M_PI/4))
+                {
+                    double x = og_x + offset*cos(angle);
+                    double y = og_y + offset*sin(angle);
+                    possible_pos.push_back(agent::Position{x,y});
+                }
+            }
+
+            // erase first possible position (already checked)
+            possible_pos.erase(possible_pos.begin());
+
+            // just to check if code works
+            if(nei_checked)
+            {
+                throw std::runtime_error("max error reached");
+            }
+            nei_checked = true;
+        }
+    }
 }
 
 bool AgentC4::findNeighbors()
@@ -209,6 +307,8 @@ bool AgentC4::findNeighbors()
     double x = m_movModel.getX();
     double y = m_movModel.getY();
     double dir = m_movModel.getDir();
+
+    std::vector<std::pair<int,int>> neighbors;
 
     // nearest cell for each sensor
     for(int i = 0; i < 7; i++) {
@@ -250,7 +350,7 @@ bool AgentC4::findNeighbors()
                 // check if linkage exists
                 int id1 = computeCellId(c1.x, c1.y);
                 int id2 = computeCellId(c2.x, c2.y);
-                if(m_perceivedMap.areNeighbors(id1,id2)) {
+                if(m_perceivedMap.isNeighbor(id1,id2) || m_perceivedMap.isNeighbor(id2,id1)) {
                     in_wall = false;
                     found = true;
                     break;
@@ -270,12 +370,11 @@ bool AgentC4::findNeighbors()
 
         if(in_wall) {
             std::pair<int,int> cells = wall.getCells();
-            m_perceivedMap.addCell(cells.first);
-            m_perceivedMap.addCell(cells.second);
-            m_perceivedMap.linkNeighbors(cells.first, cells.second);
+            neighbors.push_back(cells);
             found = true;
         }
 
+        // throw error to correct position
         if(!found && !in_wall) { // check if wall is always found
             throw std::runtime_error("no wall found"); // this should never happen on a simulation without noise
         }
@@ -283,5 +382,18 @@ bool AgentC4::findNeighbors()
         any_nei |= found;
     }
 
+    // add neighbors to the map
+    for(std::pair<int,int>& nei : neighbors) {
+        m_perceivedMap.addCell(nei.first);
+        m_perceivedMap.addCell(nei.second);
+        m_perceivedMap.linkNeighbor(nei.first, nei.second);
+    }
+
     return any_nei;
+}
+
+void AgentC4::driveMotorsExt(double t_lPow, double t_rPow)
+{
+    DriveMotors(t_lPow, t_rPow);
+    m_movModel.update(t_lPow, t_rPow);
 }

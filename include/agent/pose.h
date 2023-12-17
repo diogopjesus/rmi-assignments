@@ -31,11 +31,22 @@ public:
     void update(double t_lPow, double t_rPow);
 
     /**
-     * Corrects the movement model with the given values.
+     * Corrects the movement model direction.
      * 
-     * Sets the current values for the position (x and y) and
-     * computes the corrected values for the output power of
-     * the motors.
+     * @param t_dir corrected direction.
+    */
+    void correct(const double& t_dir);
+
+    /**
+     * Corrects the movement model position.
+     * 
+     * @param t_x corrected X position.
+     * @param t_y corrected Y position.
+    */
+    void correct(const double& t_x, const double& t_y);
+
+    /**
+     * Corrects the movement model position and direction.
      * 
      * The orientation must be filtered to compute the more accurate
      * values for the output power of the motors.
@@ -74,6 +85,8 @@ public:
     inline const double getX() const { return m_x; }
     inline const double getY() const { return m_y; }
     inline const double getDir() const { return m_dir; } // in radians
+    inline const double getRoundedX() const { return floor(m_x*10.0+0.5)/10.0; }
+    inline const double getRoundedY() const { return floor(m_y*10.0+0.5)/10.0; }
     inline const double getXWithOffset() const { return floor((m_x+844.188)*10.0+0.5)/10.0; } // same value has the GPS sensor without noise
     inline const double getYWithOffset() const { return floor((m_y+404.383)*10.0+0.5)/10.0; } // same value has the GPS sensor without noise
     inline const double getDegreesWithOffset() const { return floor(m_dir*180.0/M_PI + 0.5); } // same value has the compass sensor without noise (in degrees)
