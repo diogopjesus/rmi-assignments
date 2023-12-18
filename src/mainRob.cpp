@@ -7,11 +7,37 @@
 #include <iostream>
 #include <string>
 
+int runAgentC4(const std::string& outfile)
+{
+    int ret;
+    AgentC4 agent(outfile);
+
+    try {
+        agent.run();
+    }
+    catch(std::exception& e)
+    {
+        std::cerr << "ERROR: during agent.run(): " << e.what() << std::endl;
+    }
+
+    try {
+        ret = agent.write();
+    }
+    catch(std::exception& e)
+    {
+        std::cerr << "ERROR: during agent.write(): " << e.what() << std::endl;
+        ret = 1;
+    }
+
+    return ret;
+}
+
 int main(int argc, char** argv)
 {
     std::string host = "localhost";
     std::string rob_name = "cppAgent";
     int rob_id = 1;
+    int challenge = 0;
     std::string outfile = "solution";
 
     // processing arguments
@@ -21,7 +47,7 @@ int main(int argc, char** argv)
         
         if(opt == "--challenge" || opt == "-c")
         {
-            try { rob_id = std::stoi(argv[2]); }
+            try { challenge = std::stoi(argv[2]); }
             catch(...) { argc = 0; } // error message will be printed
         }
         else if(opt == "--host" || opt == "-h")
@@ -56,9 +82,6 @@ int main(int argc, char** argv)
       return 1;
     }
 
-    // create application
-    AgentC4 agent{outfile};
-
     // connect Robot to simulator
     double irSensorAngles[4] = {0.0, 60.0, -60.0, 180.0};
     if(InitRobot2(const_cast<char*>(rob_name.c_str()), rob_id, irSensorAngles, const_cast<char*>(host.c_str())) != 0)
@@ -68,22 +91,16 @@ int main(int argc, char** argv)
     }
     std::cout << rob_name << " Connected" << std::endl;
 
-    try {
-        agent.run();
-    }
-    catch(...)
-    {
-        std::cerr << "Error running agent" << std::endl;
-    }
-
+    // select agent
     int ret;
-    try {
-        ret = agent.write();
-    }
-    catch(...)
+    switch (challenge)
     {
-        std::cerr << "Error writing files" << std::endl;
-        ret = 1;
+        case 4:
+            ret = runAgentC4(outfile);
+            break;
+        default:
+            std::cerr << "Challenge " << challenge << " not implemented" << std::endl;
+            ret = 1;
     }
 
     return ret;
