@@ -15,4 +15,4 @@ target_include_directories(tests PRIVATE
 
 target_link_libraries(tests PRIVATE Catch2::Catch2WithMain agent)
 
-set_target_properties(tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set_target_properties(tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")

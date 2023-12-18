@@ -20,4 +20,4 @@ target_include_directories(mainRob PRIVATE
 
 target_link_libraries(mainRob agent robSock)
 
-set_target_properties(mainRob PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_BINARY_DIR}/bin")
+set_target_properties(mainRob PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
