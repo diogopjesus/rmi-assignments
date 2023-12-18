@@ -2,10 +2,18 @@ __pycache__/
 
 # Python virtual environments
 .venv
-.env
 venv
 env
 
-# mapp and path files
+# map and path files
 *.map
 *.path
+
+# build files
+build/
+bin/mainRob
+bin/test-map
+
+# testC4.sh generated files
+failed/
+scores.txt
