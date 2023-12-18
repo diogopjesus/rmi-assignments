@@ -1,0 +1,27 @@
+diff --git a/simulator/cbsimulator.cpp b/simulator/cbsimulator.cpp
+index f067c20..7a5daab 100644
+--- a/simulator/cbsimulator.cpp
++++ b/simulator/cbsimulator.cpp
+@@ -713,6 +713,9 @@ void cbSimulator::CheckIn()
+                     gui->appendMessage( QString(robot->Name())+" has been refused", true);
+ 					delete robot;
+ 				}
++
++				curState=STOPPED;
++				start();
+ 				break;
+ 			}
+ 			case cbClientForm::UNKNOWN:
+diff --git a/simulator/simulator.cpp b/simulator/simulator.cpp
+index 4af0378..35cae93 100644
+--- a/simulator/simulator.cpp
++++ b/simulator/simulator.cpp
+@@ -380,7 +380,7 @@ int main(int argc, char *argv[])
+     simulator.setGUI(&gui);
+     //gui.setMaximumSize(gui.size());
+     //gui.setMinimumSize(gui.size());
+-	gui.show();
++	// gui.show();
+ 
+     setlocale(LC_ALL,"C");
+     QLocale::setDefault(QLocale::c());
