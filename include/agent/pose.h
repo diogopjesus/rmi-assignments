@@ -23,6 +23,11 @@ public:
     virtual ~MovementModel() = default;
 
     /**
+     * Resets the movement model.
+    */
+    void reset();
+
+    /**
      * Updates the movement model with the given power values.
      * 
      * @param t_lPow Left motor power.
@@ -85,6 +90,7 @@ public:
     inline const double getX() const { return m_x; }
     inline const double getY() const { return m_y; }
     inline const double getDir() const { return m_dir; } // in radians
+    inline const double getDegrees() const { return m_dir*180.0/M_PI; } // in degrees
     inline const double getRoundedX() const { return floor(m_x*10.0+0.5)/10.0; }
     inline const double getRoundedY() const { return floor(m_y*10.0+0.5)/10.0; }
     inline const double getXWithOffset() const { return floor((m_x+844.188)*10.0+0.5)/10.0; } // same value has the GPS sensor without noise
@@ -95,10 +101,63 @@ public:
     inline void setNoise(double t_noise) { m_noise = t_noise; }
 
 private:
-    double m_vel;                               // linear velocity
+    double m_vel{0.0};                          // linear velocity
     double m_x{0.0}, m_y{0.0}, m_dir{0.0},      // current position and orientation
            m_outr{0.0}, m_outl{0.0};            // effective power applied to motors
     double m_noise{100.0};                      // noise level
+};
+
+/**
+ * Kalman Filter implementation
+*/
+class CompassFilter
+{
+public:
+    CompassFilter() = default;
+    virtual ~CompassFilter() = default;
+
+    /**
+     * Initializes the filter.
+     * 
+     * @param t_deg initial orientation (in degrees).
+     * @param t_var initial variance.
+    */
+    void init(double t_deg, double t_var);
+
+    /**
+     * Updates the filter with the measured orientation and uncertainty.
+     * 
+     * @param t_deg measured orientation (in degrees).
+     * @param t_var measured variance.
+    */
+    void update(double t_deg, double t_var);
+
+    /**
+     * Stores the predicted orientation and compute the .
+     * 
+     * @param t_deg the predicted orientation (movement model).
+     * @param t_deg_var the predicted variance.
+     * @param t_rot_var the predicted variance of the rotation (computed in movement model)
+    */
+    void predict(double t_deg, double t_deg_var, double t_rot_var);
+
+    /**
+     * Gets the estimated orientation (in degrees).
+     * 
+     * @return the estimated orientation.
+    */
+    inline double degrees() const { return m_deg; } // in degrees
+    
+    /**
+     * Resets the compass sensor.
+    */
+    void reset();
+
+private:
+    double m_deg{0.0},          // estimated orientation (in degrees)
+           m_deg_var{0.0},      // estimated variance
+           m_p_deg{0.0},        // predicted orientation (in degrees)
+           m_p_deg_var{0.0};    // predicted variance
 };
 
 }; // namespace agent

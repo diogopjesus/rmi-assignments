@@ -10,6 +10,16 @@
 namespace agent
 {
 
+void MovementModel::reset()
+{
+    m_x = 0.0;
+    m_y = 0.0;
+    m_dir = 0.0;
+    m_vel = 0.0;
+    m_outl = 0.0;
+    m_outr = 0.0;
+}
+
 void MovementModel::update(double t_lPow, double t_rPow)
 {
     // clamp input values
@@ -86,6 +96,52 @@ std::pair<double,double> MovementModel::stop()
 bool MovementModel::stopped() const
 {
     return (m_outl == 0 && m_outr == 0);
+}
+
+
+void CompassFilter::init(double t_deg, double t_var)
+{
+    m_p_deg = t_deg;
+    m_p_deg_var = t_var;
+}
+
+void CompassFilter::update(double t_deg, double t_var)
+{    
+    // Calculate Kalman gain
+    double Kn = m_p_deg_var / (m_p_deg_var + t_var);
+
+    // Estimate the current state (orientation)
+    // using the state update equation
+    double angdiff = t_deg - m_p_deg;
+    if(angdiff > 180.0) angdiff -= 360.0;
+    else if(angdiff < -180.0) angdiff += 360.0;
+    m_deg = m_p_deg + Kn * (angdiff);
+    if(m_deg > 180.0) m_deg -= 360.0;
+    else if(m_deg < -180.0) m_deg += 360.0;
+
+    // Update the current estimate uncertainty
+    m_deg_var = (1.0 - Kn) * m_p_deg_var;
+}
+
+void CompassFilter::predict(double t_deg, double t_deg_var, double t_rot_var)
+{
+    // Predict the next state (orientation)
+    // t_deg is the predicted orientation computed by the movement model.
+    m_p_deg = t_deg;
+
+    // Predict the current estimate uncertainty
+    // t_deg_var is the predicted variance
+    // t_rot_var is the predicted variance of the rotation (computed in movement model)
+    // delta_t is 1 because the state is predicted at each time step
+    m_p_deg_var = t_deg_var + 1.0 * t_rot_var;
+}
+
+void CompassFilter::reset()
+{
+    m_deg = 0.0;
+    m_deg_var = 0.0;
+    m_p_deg = 0.0;
+    m_p_deg_var = 0.0;
 }
 
 }; // namespace agent
