@@ -20,7 +20,7 @@ To test the scores of the generated best paths and perceived maps, run the follo
 ```
 ./test-run.sh -cX [-f outfile]  # X between 1 and 4
 ```
-To automate runs, you can apply the **AutomateRuns_CiberRatoTools.patch** to the ciberRatoTools repository, and then run the **loop.sh** script (**do not forget to re-build the simulator)**.
+To automate runs, you can apply the **automateRuns_CiberRatoTools.patch** (available on patches) to the ciberRatoTools repository, and then run the **loop.sh** script (**do not forget to re-build the simulator)**.
 ```
 ./loop.sh -cX # X between 1 and 4
 ```
