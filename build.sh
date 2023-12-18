@@ -24,7 +24,7 @@ cd build
 echo "Status: Building agent..."
 cmake ..
 if ! command -v nproc >/dev/null 2>&1 ; then
-    make -j4
+    make
 else
     make -j$(nproc)
 fi
