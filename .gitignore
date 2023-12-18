@@ -13,3 +13,7 @@ env
 # build files
 build/
 bin/
+
+# testC4.sh generated files
+failed_runs/
+scores.txt
