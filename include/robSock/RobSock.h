@@ -222,6 +222,9 @@ extern void           SetVisitingLed(bool val);
 /* Finish the round */
 extern void           Finish(void);
 
+/* Reset the round */
+extern void           Reset(void);
+
 /* Broadcast message */
 extern void           Say(char * msg);
 
