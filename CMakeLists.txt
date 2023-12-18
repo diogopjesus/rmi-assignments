@@ -18,4 +18,4 @@ find_package(Qt5 COMPONENTS Widgets Xml REQUIRED)
 add_compile_options(-DTRUE=1 -DFALSE=0)
 
 add_subdirectory(src)
-add_subdirectory(test)
+add_subdirectory(tests)

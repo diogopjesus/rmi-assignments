@@ -1,18 +1,18 @@
 find_package(Catch2 3 REQUIRED)
 
-set(tests_SRCS 
+set(test-map_SRCS 
     test-map.cpp
 )
 
 # These tests can use the Catch2-provided main
-add_executable(tests ${tests_SRCS})
+add_executable(test-map ${tests_SRCS})
 
-target_include_directories(tests PRIVATE
+target_include_directories(test-map PRIVATE
                             "${CMAKE_CURRENT_SOURCE_DIR}"
                             "${CMAKE_SOURCE_DIR}/src"
                             "${CMAKE_SOURCE_DIR}/include"
                         )
 
-target_link_libraries(tests PRIVATE Catch2::Catch2WithMain agent)
+target_link_libraries(test-map PRIVATE Catch2::Catch2WithMain agent)
 
-set_target_properties(tests PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
+set_target_properties(test-map PROPERTIES RUNTIME_OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin")
