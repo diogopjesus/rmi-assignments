@@ -12,8 +12,9 @@ env
 
 # build files
 build/
-bin/
+bin/mainRob
+bin/test-map
 
 # testC4.sh generated files
-failed_runs/
+failed/
 scores.txt
