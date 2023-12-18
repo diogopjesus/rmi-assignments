@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -eu
 
 source .env
 
@@ -44,7 +44,7 @@ shift $(($OPTIND-1))
 case $challenge in
     1)
         source $VENV_DIR/bin/activate
-        python3 $BIN_DIR/pyMainRob.py -c $challenge -h "$host" -p "$pos" -r "$robname" -f "$outfile"
+        python3 $BIN_DIR/pyMainRob.py -c $challenge -h "$host" -p "$pos" -r "$robname"
         deactivate
         ;;
     2)

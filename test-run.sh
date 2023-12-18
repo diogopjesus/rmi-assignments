@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -eu
 
 source .env
 
@@ -10,33 +10,35 @@ if ! command -v gawk >/dev/null 2>&1 ; then
 fi
 
 mappingScore() {
-    outfile=$1
+    m_simulator_outfile=$1
+    m_outfile=$2
 
-    tmpfile=".tmp$(date +%s%N)"
+    m_tmpfile=".tmp$(date +%s%N)"
 
-    gawk -f $MAPPING_SCORE_SCRIPT $SIMULATOR_OUTFILE $outfile > $tmpfile
+    gawk -f $MAPPING_SCORE_SCRIPT $m_simulator_outfile $m_outfile > $m_tmpfile
     
-    map_score=$(tail -n 1 $tmpfile) # last line
-    map_score=$(echo $map_score | sed -e "s/mapping score://gi") # isolate score
+    m_map_score=$(tail -n 1 $m_tmpfile) # last line
+    m_map_score=$(echo $m_map_score | sed -e "s/mapping score://gi") # isolate score
     
-    rm $tmpfile
+    rm $m_tmpfile
 
-    return $map_score
+    echo $m_map_score
 }
 
 planningScore() {
-    outfile=$1
+    m_simulator_outfile=$1
+    m_outfile=$2
 
-    tmpfile=".tmp$(date +%s%N)"
+    m_tmpfile=".tmp$(date +%s%N)"
 
-    gawk -f $PLANNING_SCORE_SCRIPT $SIMULATOR_OUTFILE $outfile > $tmpfile
+    gawk -f $PLANNING_SCORE_SCRIPT $m_simulator_outfile $m_outfile > $m_tmpfile
     
-    path_score=$(tail -n 1 $tmpfile) # last line
-    path_score=$(echo $path_score | sed -e "s/planning score: //gi") # isolate score
+    m_path_score=$(tail -n 1 $m_tmpfile) # last line
+    m_path_score=$(echo $m_path_score | sed -e "s/planning score: //gi") # isolate score
     
-    rm $tmpfile
+    rm $m_tmpfile
 
-    return $path_score
+    echo $m_path_score
 }
 
 challenge="0"
@@ -69,16 +71,14 @@ case $challenge in
 
         echo "TEST: testing generated map..."
         
-        # get best case
-        mappingScore $SIMULATOR_OUTFILE
-        best_map_score=$?
-        
-        mappingScore "$outfile.map"
-        map_score=$?
+        best_map_score=$(mappingScore $SIMULATOR_MAPPING_OUTFILE $SIMULATOR_MAPPING_OUTFILE) 
+
+        map_score=$(mappingScore $SIMULATOR_MAPPING_OUTFILE $outfile.map)
 
         # check if map score matches the best_case
         if [[ "$map_score" != "$best_map_score" ]]; then
-            echo "TEST: failed to obtain best case!"
+            echo "TEST: failed to obtain exact map!"
+            echo "TEST: map score is $map_score"
         else
             echo "TEST: passed!"
         fi
@@ -95,18 +95,13 @@ case $challenge in
         
         best_path_score="1"
         
-        planningScore "$outfile.path"
-        path_score=$?
+        path_score=$(planningScore $SIMULATOR_PLANNING_OUTFILE "$outfile.path")
 
-        # check if path score matches the best_case
-        if [[ "$path_score" != best_path_score ]]; then
-            echo "TEST 2: failed to obtain best case!"
-
-            # store failed path
-            mkdir -p "$FAILED_DIR"
-            cp "$outfile.path" "$FAILED_DIR/$failname.path"
+        if [[ $path_score != $best_path_score ]]; then
+            echo "TEST: failed to obtain best path!"
+            echo "TEST: path score is $path_score"
         else
-            echo "TEST 2: passed!"
+            echo "TEST: passed!"
         fi
         ;;
 
@@ -128,16 +123,14 @@ case $challenge in
 
         echo "TEST 1: testing generated map..."
         
-        # get best case
-        mappingScore $SIMULATOR_OUTFILE
-        best_map_score=$?
+        best_map_score=$(mappingScore $SIMULATOR_PLANNING_OUTFILE $SIMULATOR_PLANNING_OUTFILE) # use planning file to get best case
         
-        mappingScore "$outfile.map"
-        map_score=$?
+        map_score=$(mappingScore $SIMULATOR_PLANNING_OUTFILE "$outfile.map")
 
         # check if map score matches the best_case
         if [[ "$map_score" != "$best_map_score" ]]; then
-            echo "TEST 1: failed to obtain best case!"
+            echo "TEST 1: failed to obtain exact map!"
+            echo "TEST: map score is $map_score"
             
             # store failed map
             mkdir -p "$FAILED_DIR"
@@ -150,12 +143,12 @@ case $challenge in
 
         best_path_score="1"
 
-        planningScore "$outfile.path"
-        path_score=$?
+        path_score=$(planningScore $SIMULATOR_PLANNING_OUTFILE "$outfile.path")
 
         # check if path score matches the best_case
-        if [[ "$path_score" != best_path_score ]]; then
-            echo "TEST 2: failed to obtain best case!"
+        if [[ $path_score != $best_path_score ]]; then
+            echo "TEST 2: failed to obtain best path!"
+            echo "TEST: path score is $path_score"
 
             # store failed path
             mkdir -p "$FAILED_DIR"

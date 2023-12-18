@@ -1,6 +1,6 @@
 #!/bin/bash
 
-set -e
+set -eu
 
 source .env
 
@@ -10,7 +10,6 @@ run() {
 
     args="SIMULATOR_ARGS_C"$challenge
     args=${!args}
-    echo "Running challenge $challenge with args: $args"
 
     (cd ../simulator; ./simulator $args) >/dev/null 2>&1 &
     sleep 1
@@ -26,7 +25,7 @@ run() {
     killall Viewer >/dev/null 2>&1 || true
 }
 
-silent_mode=0 # whether to run in silent mode
+silent_mode=0
 
 while getopts "c:s" op
 do
@@ -51,7 +50,7 @@ case $challenge in
     1)
         for n in $(seq 1 $NUM_RUNS)
         do
-            if [ "$silent_mode" = 0 ]; then
+            if [ "$silent_mode" != 0 ]; then
                 run $challenge $outfile >/dev/null 2>&1
             else
                 echo "Run $n:"
@@ -62,13 +61,13 @@ case $challenge in
     2|3)
         for n in $(seq 1 $NUM_RUNS)
         do
-            if [ "$silent_mode" = 0 ]; then
+            if [ "$silent_mode" != 0 ]; then
                 run $challenge $outfile >/dev/null 2>&1
-                ./test.sh -c$challenge -f$outfile >/dev/null 2>&1
+                ./test-run.sh -c$challenge -f$outfile >/dev/null 2>&1
             else
                 echo "Run $n:"
                 run $challenge $outfile
-                ./test.sh -c$challenge -f$outfile
+                ./test-run.sh -c$challenge -f$outfile
             fi
         done
         ;;
@@ -79,13 +78,13 @@ case $challenge in
 
         for n in $(seq 1 $NUM_RUNS)
         do
-            if [ "$silent_mode" = 0 ]; then
+            if [ "$silent_mode" != 0 ]; then
                 run $challenge $outfile >/dev/null 2>&1
-                ./test.sh -c$challenge -f$outfile >/dev/null 2>&1
+                ./test-run.sh -c$challenge -f$outfile >/dev/null 2>&1
             else
                 echo "Run $n:"
                 run $challenge $outfile
-                ./test.sh -c$challenge -f$outfile
+                ./test-run.sh -c$challenge -f$outfile
             fi
         done
 
