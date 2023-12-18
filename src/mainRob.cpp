@@ -68,7 +68,23 @@ int main(int argc, char** argv)
     }
     std::cout << rob_name << " Connected" << std::endl;
 
-    agent.run();
+    try {
+        agent.run();
+    }
+    catch(...)
+    {
+        std::cerr << "Error running agent" << std::endl;
+    }
 
-    return agent.write();
+    int ret;
+    try {
+        ret = agent.write();
+    }
+    catch(...)
+    {
+        std::cerr << "Error writing files" << std::endl;
+        ret = 1;
+    }
+
+    return ret;
 }
