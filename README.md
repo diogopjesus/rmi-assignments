@@ -30,11 +30,16 @@ To automate runs, you can apply the **AutomateRuns_CiberRatoTools.patch** to the
 - Localization,
 - Mapping,
 - Planning.
+
 Programmed in Python.
+
 **Final Grade:** 17.1/20
   
 ## Assignment 2
 Develop a single agent that solves the three problems presented in assignment 1 with only a line sensor, a noisy compass and the movement model.
+
 To approximate the values of the compass a Kalman filter was implemented.
+
 Programmed in C++.
+
 **Final Grade:** ??/20
