@@ -21,7 +21,7 @@ TEST_CASE( "Common map usage", "[map]" )
                 REQUIRE(map.addCell(id));
                 REQUIRE_FALSE(map.cellIsExpanded(id));
                 REQUIRE_FALSE(map.isComplete());
-                map.expandCell(id);
+                map.setCellExpanded(id, true);
             }
         }
 
@@ -85,7 +85,7 @@ TEST_CASE("Invalid cells", "[map]")
             {
                 int id = computeCellId(x,y);
                 REQUIRE_THROWS_AS( map.addCell(id), std::invalid_argument );
-                REQUIRE_THROWS_AS( map.expandCell(id), std::invalid_argument );
+                REQUIRE_THROWS_AS( map.setCellExpanded(id, true), std::invalid_argument );
                 REQUIRE_THROWS_AS( map.cellIsExpanded(id), std::invalid_argument );
             }
         }
@@ -124,10 +124,10 @@ TEST_CASE( "Small real world scenario", "[map]" )
 
     REQUIRE_FALSE( map.isComplete() );
     
-    map.expandCell(514);
-    map.expandCell(516);
-    map.expandCell(612);
-    map.expandCell(614);
+    map.setCellExpanded(514 ,true);
+    map.setCellExpanded(516, true);
+    map.setCellExpanded(612, true);
+    map.setCellExpanded(614, true);
     
     map.cellIsExpanded(514);
     map.cellIsExpanded(516);
