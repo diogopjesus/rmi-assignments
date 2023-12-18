@@ -35,7 +35,6 @@ mkdir -p $tmpdir/agent
 
 case $assignment in
     1)
-        #TODO
         cp build.sh \
            run.sh \
            requirements.txt \
