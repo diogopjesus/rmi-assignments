@@ -18,7 +18,7 @@ int AgentC4::run()
     nid = m_perceivedMap.getNextCell(cid); // get next cell
 
     while(!GetFinished()) {
-        ReadSensors(); //update sensors
+        ReadSensors();
         m_compassFilter.update(GetCompassSensor(), m_dir_var);
         m_movModel.correct(m_compassFilter.degrees() * (M_PI/180.0));
 
@@ -78,7 +78,7 @@ int AgentC4::run()
 
             case RETURN:
             {
-                if(ground == 0) { // TODO: check if this is enough
+                if(ground == 0) {
                     state = FINISHED;
                     break;
                 }
@@ -90,14 +90,11 @@ int AgentC4::run()
             }
         }
 
-        // std::cout << m_perceivedMap.toString() << std::endl;
-
         if(state != STOP)
         {
             driveMotorsExt(lPow,rPow);
         }
     }
-
 
     return m_perceivedMap.isComplete() ? 0 : 1;
 }
@@ -139,8 +136,14 @@ int AgentC4::init()
     m_controller.setSaturation(0.5); // TODO: change to a more appropriate value
     m_controller.reset();
 
+    // initialize compass filter
+    double noise = GetNoiseMotors();
+    m_pos_var = noise*noise;
+    noise = GetNoiseCompassSensor();
+    m_dir_var = noise*noise;
     m_compassFilter.init(0.0, 0.0);
 
+    // initialize movement model
     driveMotorsExt(0.0, 0.0);
 
     return cid;
