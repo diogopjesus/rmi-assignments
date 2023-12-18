@@ -17,6 +17,7 @@ public:
 
     virtual int run() = 0;
     virtual int write() = 0;
+    virtual int reset() = 0;
 
     static constexpr int INIT = 1;
     static constexpr int RUN = 2;

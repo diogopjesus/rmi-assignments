@@ -4,6 +4,8 @@
 
 #include <iostream>
 
+#include <unistd.h>
+
 int AgentC4::run()
 {
     int state=STOP,
@@ -17,14 +19,8 @@ int AgentC4::run()
 
     while(!GetFinished()) {
         ReadSensors(); //update sensors
-        
-        //TODO: implement an filter to the compass
-        m_movModel.correct(agent::deg2rad(GetCompassSensor()));
-
-        // compare positions
-        // std::cout << "x: " << m_movModel.getXWithOffset() << " y: " << m_movModel.getYWithOffset() << " dir: " << m_movModel.getDegreesWithOffset() << std::endl;
-        // std::cout << "x: " << GetX() << " y: " << GetY() << " dir: " << GetCompassSensor() << std::endl;
-        // std::cout << std::endl;
+        m_compassFilter.update(GetCompassSensor(), m_dir_var);
+        m_movModel.correct(m_compassFilter.degrees() * (M_PI/180.0));
 
         // check if simulation has finished
         if(GetTime() >= GetFinalTime() || state == FINISHED) {
@@ -52,12 +48,11 @@ int AgentC4::run()
             // expand first cell and get next cell
             case INIT:
             {
-                // bool any_nei = findNeighbors();
                 findAndCorrect();
 
                 float dir = m_movModel.getDir();
                 if(dir > -(M_PI/4) && dir < 0) {
-                    m_perceivedMap.expandCell(cid);
+                    m_perceivedMap.setCellExpanded(cid, true);
                     nid = m_perceivedMap.getNextCell(cid);
                     state = RUN;
                 }
@@ -68,8 +63,8 @@ int AgentC4::run()
 
             case RUN:
             {
-                // bool any_nei = findNeighbors();                
                 findAndCorrect();
+
                 std::pair<double,double> powers = move(cid,nid);
                 lPow = powers.first;
                 rPow = powers.second;
@@ -100,8 +95,6 @@ int AgentC4::run()
         if(state != STOP)
         {
             driveMotorsExt(lPow,rPow);
-
-            // std::cout << "x: " << 4.0+m_movModel.getX() << " y: " << 10.0+m_movModel.getY() << " dir: " << m_movModel.getDir() << std::endl;
         }
     }
 
@@ -122,6 +115,15 @@ int AgentC4::write()
     return 0;
 }
 
+int AgentC4::reset()
+{
+    m_movModel.reset();
+    m_perceivedMap.reset();
+    m_controller.reset();
+    m_checkpoints.clear();
+    return 0;
+}
+
 int AgentC4::init()
 {
     ReadSensors(); // initialize sensors
@@ -137,6 +139,8 @@ int AgentC4::init()
     m_controller.setSaturation(0.5); // TODO: change to a more appropriate value
     m_controller.reset();
 
+    m_compassFilter.init(0.0, 0.0);
+
     driveMotorsExt(0.0, 0.0);
 
     return cid;
@@ -144,6 +148,8 @@ int AgentC4::init()
 
 std::pair<double,double> AgentC4::move(int& t_cid, int& t_nid)
 {
+    static bool wasExpanded = false;
+
     double lPow, rPow;
 
     // distance to nid
@@ -151,16 +157,17 @@ std::pair<double,double> AgentC4::move(int& t_cid, int& t_nid)
     double dist = agent::distance(m_movModel.getX(), m_movModel.getY(), np.x, np.y);
 
     if(dist < 0.1) { // if robot is close to the next cell, then get the next one
-        m_perceivedMap.expandCell(t_cid);
+        m_perceivedMap.setCellExpanded(t_cid, true);
         t_cid = t_nid;
 
-        m_perceivedMap.getNeighbors(t_cid);
         // search for edge case where a neighbor was found
         // but the neighbor cell did not detect that linkage
         // when it was expanded.
         for(int nei : m_perceivedMap.getNeighbors(t_cid)) {
             if(m_perceivedMap.cellIsExpanded(nei) && !m_perceivedMap.isNeighbor(nei, t_cid)) {
                 t_nid = nei;
+                wasExpanded = true;
+                m_perceivedMap.setCellExpanded(t_nid, false);
                 break;
             }
         }
@@ -206,15 +213,13 @@ std::pair<double,double> AgentC4::move(int& t_cid, int& t_nid)
         rPow = 0.1+u;
     }
     else {
-        if(dist > 0.438 && t_nid != t_cid) {
-            std::cout << "unlink next cell " << agent::computeCellCoordinates(t_nid).toString() << " from " << agent::computeCellCoordinates(t_cid).toString() << std::endl;
-            // print current neighbors of cid
-            std::cout << "neighbors of " << agent::computeCellCoordinates(t_cid).toString() << ": ";
-            for(int nei : m_perceivedMap.getNeighbors(t_cid)) {
-                std::cout << agent::computeCellCoordinates(nei).toString() << " ";
+        if(dist > 0.438 && t_nid != t_cid) {            
+            // correct expansion status of a already expanded cell
+            if(wasExpanded) {
+                m_perceivedMap.setCellExpanded(t_nid, true);
+                wasExpanded = false;
             }
-            std::cout << std::endl;
-            
+
             m_perceivedMap.unlinkNeighbor(t_cid, t_nid);
             t_nid = t_cid;
             np = agent::computeCellCoordinates(t_cid);
@@ -228,31 +233,24 @@ std::pair<double,double> AgentC4::move(int& t_cid, int& t_nid)
 
 void AgentC4::findAndCorrect()
 {
-    static double max_error = 1.5/100.0;
-
     double og_x = m_movModel.getX();
     double og_y = m_movModel.getY();
 
-    double error = 0.0;
+    double error = 1.5/100.0;
 
     std::vector<agent::Position> possible_pos;
 
     bool success = false;
-    bool nei_checked = false;
+    int iter = 0;
     while(!success)
     {
         try
         {
             findNeighbors();
             success = true;
-            max_error += 1.5/100.0;
         }
         catch(const std::runtime_error& e)
         {
-            // std::cout << std::endl;
-            // std::cout << "In correction" << std::endl;
-            // std::cout << "x: " << 4.0+m_movModel.getX() << " y: " << 10.0+m_movModel.getY() << " dir: " << m_movModel.getDir() << std::endl;
-
             // update to new position
             if(!possible_pos.empty())
             {
@@ -263,7 +261,7 @@ void AgentC4::findAndCorrect()
             }
             
             // compute possible positions
-            for(double offset = 0; offset < max_error; offset += 0.001)
+            for(double offset = iter*error; offset < (iter+1)*error; offset += 0.001)
             {
                 for(double angle = 0; angle < 2*M_PI; angle += (M_PI/4))
                 {
@@ -275,13 +273,7 @@ void AgentC4::findAndCorrect()
 
             // erase first possible position (already checked)
             possible_pos.erase(possible_pos.begin());
-
-            // just to check if code works
-            if(nei_checked)
-            {
-                throw std::runtime_error("max error reached");
-            }
-            nei_checked = true;
+            iter++;
         }
     }
 }
@@ -396,4 +388,5 @@ void AgentC4::driveMotorsExt(double t_lPow, double t_rPow)
 {
     DriveMotors(t_lPow, t_rPow);
     m_movModel.update(t_lPow, t_rPow);
+    m_compassFilter.predict(m_movModel.getDegrees(), m_dir_var, m_pos_var+m_pos_var);
 }

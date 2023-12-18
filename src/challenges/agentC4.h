@@ -15,6 +15,7 @@ public:
 
     int run() override;
     int write() override;
+    int reset() override;
 
 private:
     /**
@@ -55,9 +56,13 @@ private:
 
     const std::string m_outfile{"solution"};
     agent::MovementModel m_movModel{};
+    agent::CompassFilter m_compassFilter{};
+    double m_pos_var{(1.5/100.0)*(1.5/100.0)},  // variance of the motors
+           m_dir_var{(2.0)*(2.0)};              // variance of the direction
     agent::PerceivedMap m_perceivedMap{};
     agent::Controller m_controller{};
     std::vector<int> m_checkpoints;
+
 };
 
 #endif // AGENT_C4_H
