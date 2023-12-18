@@ -4,7 +4,7 @@ set -e
 
 # check dependecies (cmake)
 if ! command -v cmake >/dev/null 2>&1 ; then
-    echo "Error: cmake not found on system!"
+    echo "Error: cmake not found on system!" 1>&2
     exit 1
 fi
 

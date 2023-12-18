@@ -12,7 +12,7 @@ scofile="scores.txt"
 mkdir -p $failed_dir
 
 if ! command -v gawk >/dev/null 2>&1 ; then
-    echo "Error: gawk not found on system!"
+    echo "Error: gawk not found on system!" 1>&2
     exit 1
 fi
 

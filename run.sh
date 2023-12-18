@@ -2,6 +2,7 @@
 
 set -e
 
+bindir="bin"
 challenge="0"
 host="localhost"
 robname="pClient"
@@ -36,6 +37,6 @@ shift $(($OPTIND-1))
 
 case $challenge in
     4)
-        ./bin/mainRob -h "$host" -p "$pos" -r "$robname" -f "$outfile"
+        $bindir/mainRob -c $challenge -h "$host" -p "$pos" -r "$robname" -f "$outfile"
         ;;
 esac
