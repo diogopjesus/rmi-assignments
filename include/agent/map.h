@@ -98,13 +98,19 @@ public:
     bool unlinkNeighbor(int t_id);
 
     /**
-     * Expand the cell.
+     * Set cell expansion.
      * 
-     * This means that all neighbors are added to the list of neighbors.
+     * A cell is expanded all neighbors are added to the list of neighbors.
+     * A cell can be unexpanded because it might detect some neighbors that are not connected.
+     * This way, the cell can be expanded again when the connection is verified.
      * 
      * @return True if the cell was expanded, false otherwise.
     */
-    inline void expand() { m_expanded = true; } 
+    inline void setExpanded(bool t_expanded) { m_expanded = t_expanded; } 
+
+    /**
+     * 
+    */
 
 private:
     int m_id;
@@ -123,6 +129,11 @@ class PerceivedMap
 public:
     PerceivedMap() = default;
     virtual ~PerceivedMap() = default;
+
+    /**
+     * Reset the map.
+    */
+    void reset();
 
     /**
      * Add a cell to the map.
@@ -170,11 +181,12 @@ public:
     bool isNeighbor(const int& t_id1, const int& t_id2);
 
     /**
-     * Set a cell as expanded.
+     * Set a cell expansion.
      * 
      * @param t_id The identifier of the cell.
+     * @param t_expanded True if the cell is expanded, false otherwise.
     */
-    void expandCell(const int& t_id);
+    void setCellExpanded(const int& t_id, bool t_expanded);
 
     /**
      * Check if a cell is expanded.

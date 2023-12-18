@@ -102,7 +102,7 @@ bool MapCell::linkNeighbor(int t_id)
     if(dist != 2)
         throw std::invalid_argument("MapCell::linkNeighbor - t_id=" + std::to_string(t_id) +" is not a neighbor of " + std::to_string(m_id) + " (distance=" + std::to_string(dist) + ")");
 
-    // check if cell is already expanded or t_id is already a neighbor
+    // (check if cell is already expanded) or t_id is already a neighbor
     if(isExpanded() || std::find(m_neighbors.begin(), m_neighbors.end(), t_id) != m_neighbors.end())
         return false;
 
@@ -119,7 +119,7 @@ bool MapCell::linkNeighbor(int t_id)
     bool middle_full = m_neighbors.size() >= 8;
 
     if(corner_full || margin_full || middle_full)
-        expand();
+        setExpanded(true);
 
     return true;
 }
@@ -146,6 +146,14 @@ bool MapCell::unlinkNeighbor(int t_id)
 
 
 /*** PerceivedMap implementation: public methods ***/
+
+void PerceivedMap::reset()
+{
+    m_list.clear();
+    m_path.clear();
+    m_next = -1;
+    m_complete = false;
+}
 
 bool PerceivedMap::addCell(int t_id)
 {
@@ -220,18 +228,18 @@ bool PerceivedMap::isNeighbor(const int& t_id1, const int& t_id2)
     return false;
 }
 
-void PerceivedMap::expandCell(const int& t_id)
+void PerceivedMap::setCellExpanded(const int& t_id, bool t_expanded)
 {
     // Validate identifier
     if(!validateCellId(t_id))
-        throw std::invalid_argument("PerceivedMap::expandCell - " + std::to_string(t_id) + " is not a valid identifier");
+        throw std::invalid_argument("PerceivedMap::setCellExpanded - " + std::to_string(t_id) + " is not a valid identifier");
 
     // Check if cell is in map
     if(!cellInLocalMap(t_id))
-        throw std::invalid_argument("PerceivedMap::expandCell - " + std::to_string(t_id) + " is not in map");
+        throw std::invalid_argument("PerceivedMap::setCellExpanded - " + std::to_string(t_id) + " is not in map");
     
-    // Expand cell
-    getCell(t_id).expand();
+    // set cell expansion
+    getCell(t_id).setExpanded(t_expanded);
 }
 
 bool PerceivedMap::cellIsExpanded(const int& t_id)
