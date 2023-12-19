@@ -101,10 +101,10 @@ case $challenge in
             total_path_score=$(echo "scale=2;$total_path_score + $score" | bc)
         done < scores.txt
 
-        map_score=$(echo "scale=2;$map_score / $NUM_ITER" | bc -l)
-        path_score=$(echo "scale=2;$path_score / $NUM_ITER" | bc -l)
+        total_map_score=$(echo "scale=2;$total_map_score / $NUM_RUNS" | bc -l)
+        total_path_score=$(echo "scale=2;$total_path_score / $NUM_RUNS" | bc -l)
 
-        echo "Average map score: $map_score"
-        echo "Average path score: $path_score"
+        echo "Average map score: $total_map_score"
+        echo "Average path score: $total_path_score"
         ;;
 esac
