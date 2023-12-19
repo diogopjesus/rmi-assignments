@@ -109,6 +109,7 @@ void CompassFilter::update(double t_deg, double t_var)
 {    
     // Calculate Kalman gain
     double Kn = m_p_deg_var / (m_p_deg_var + t_var);
+    if(Kn != Kn) Kn = 0.0; // if the variance is 0
 
     // Estimate the current state (orientation)
     // using the state update equation
