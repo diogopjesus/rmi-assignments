@@ -42,4 +42,4 @@ To approximate the values of the compass a Kalman filter was implemented.
 
 Programmed in C++.
 
-**Final Grade:** ??/20
+**Final Grade:** 16.7/20
